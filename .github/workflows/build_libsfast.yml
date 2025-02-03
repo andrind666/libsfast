@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repository  # ✅ Pastikan repository di-clone dengan benar
         uses: actions/checkout@v3
 
       - name: Install Dependencies
