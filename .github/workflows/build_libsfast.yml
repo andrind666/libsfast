@@ -24,6 +24,7 @@ jobs:
           mkdir -p ~/libsfast && cd ~/libsfast
           git clone --recursive https://github.com/kiwibrowser/src.git src
           cd src
+          gclient config --name src --unmanaged https://github.com/kiwibrowser/src.git  # ✅ Perbaiki konfigurasi gclient
           gclient sync --nohooks
           gclient runhooks
 
@@ -62,7 +63,7 @@ jobs:
           ninja -C out/Minimal-arm64 libsfast
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4  # ✅ Sudah diperbaiki ke v4
+        uses: actions/upload-artifact@v4
         with:
           name: libsfast
           path: |
