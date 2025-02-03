@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repository  # ✅ Pastikan repository di-clone dengan benar
         uses: actions/checkout@v3
 
       - name: Install Dependencies
@@ -21,7 +21,7 @@ jobs:
 
       - name: Clone Kiwi Browser Source
         run: |
-          mkdir ~/libsfast && cd ~/libsfast
+          mkdir -p ~/libsfast && cd ~/libsfast
           git clone --recursive https://github.com/kiwibrowser/src.git src
           cd src
           gclient sync --nohooks
