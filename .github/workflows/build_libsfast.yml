@@ -36,7 +36,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/kiwibrowser/src.git kiwi
           cd kiwi
-          ./build/install-build-deps.sh --unsupported  # Mengatasi error distro tidak didukung
+          yes | ./build/install-build-deps.sh --unsupported  # Mengatasi error distro tidak didukung
 
           # Tentukan arsitektur
           ARCH=${{ matrix.arch }}
