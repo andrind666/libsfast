@@ -29,7 +29,24 @@ jobs:
             add-apt-repository ppa:deadsnakes/ppa -y &&
             apt update &&
             apt install -y python3 python3-dev python3-pip libssl-dev libffi-dev libgcc-5-dev &&
-            
+
+            echo 'Menginstal GN (Generate Ninja)...';
+            git clone https://gn.googlesource.com/gn &&
+            cd gn &&
+            python build/gen.py &&
+            ninja -C out &&
+            mv out/gn /usr/local/bin/ &&
+            cd .. &&
+
+            echo 'Menginstal Android NDK...';
+            mkdir -p /workspace/android-ndk &&
+            cd /workspace/android-ndk &&
+            curl -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r23b-linux.zip &&
+            unzip android-ndk.zip &&
+            export ANDROID_NDK_HOME=/workspace/android-ndk/android-ndk-r23b &&
+            export PATH=\$ANDROID_NDK_HOME:\$PATH &&
+            cd .. &&
+
             echo 'Mengkloning source code Kiwi Browser...';
             git clone --depth 1 https://github.com/kiwibrowser/src.git kiwi &&
             cd kiwi &&
@@ -39,14 +56,14 @@ jobs:
 
             echo 'Menjalankan proses build untuk arsitektur ${{ matrix.arch }}...';
             ARCH=${{ matrix.arch }}
-            gn gen out/${ARCH} --args=\"target_os=\\\"android\\\" target_cpu=\\\"${ARCH}\\\" is_debug=false symbol_level=0 is_official_build=true enable_extensions=true proprietary_codecs=true enable_nacl=false\" &&
-            ninja -C out/${ARCH} libkiwi.so &&
+            gn gen out/\$ARCH --args=\"target_os=\\\"android\\\" target_cpu=\\\"\$ARCH\\\" is_debug=false symbol_level=0 is_official_build=true enable_extensions=true proprietary_codecs=true enable_nacl=false\" &&
+            ninja -C out/\$ARCH libkiwi.so &&
             
             echo 'Build selesai!'
           "
 
       - name: Upload Library Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: kiwi-libraries-${{ matrix.arch }}
           path: kiwi/out/${{ matrix.arch }}/libkiwi.so
