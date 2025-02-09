@@ -17,10 +17,10 @@ jobs:
       - name: Clone Kiwi Browser source code
         run: |
           git clone --depth=1 https://github.com/kiwibrowser/src.git kiwi_source
+  
       - name: Compress with high compression (7z)
         run: |
           7z a -t7z kiwi_source.7z ./kiwi_source
-
 
       - name: Compress with high compression (7z)
         run: |
@@ -30,7 +30,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kiwi_source
-          path: kiwi_source.7z
+          path: kiwi_hg.7z
           retention-days: 7  # Hapus setelah 7 hari
 
       - name: Commit and push compressed file to repository
