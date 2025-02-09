@@ -1,70 +1,43 @@
-name: Build libsfast.so for Android
+name: Clone and Compress Kiwi Browser
 
-on: [push, pull_request]
+on:
+  workflow_dispatch:  # Bisa dijalankan manual dari GitHub Actions
 
 jobs:
-  build:
+  clone-compress:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install Dependencies
+      - name: Install dependencies (p7zip)
+        run: sudo apt-get update && sudo apt-get install -y p7zip-full
+
+      - name: Clone Kiwi Browser source code
         run: |
-          sudo apt update
-          sudo apt install -y git python3 clang cmake ninja-build pkg-config openjdk-17-jdk
-
-      - name: Setup Depot Tools
+          git clone --depth=1 https://github.com/kiwibrowser/src.git kiwi_source
+      - name: Compress with high compression (7z)
         run: |
-          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          echo "$PWD/depot_tools" >> $GITHUB_PATH
+          7z a -t7z kiwi_source.7z ./kiwi_source
 
-      - name: Clone Kiwi Browser Source
+
+      - name: Compress with high compression (7z)
         run: |
-          mkdir ~/libsfast && cd ~/libsfast
-          git clone --recursive https://github.com/kiwibrowser/src.git src
-          cd src
-          gclient sync --nohooks
-          gclient runhooks
+          7z a -t7z -mx=9 kiwi_hg.7z kiwi_source.7z
 
-      - name: Configure & Build Minimal Library (ARM)
-        run: |
-          cd ~/libsfast/src
-          gn gen out/Minimal-arm --args="
-          target_os='android'
-          target_cpu='arm'
-          is_debug=false
-          is_official_build=true
-          enable_extensions=true
-          enable_devtools=true
-          enable_webview=true
-          enable_multi_tab=true
-          symbol_level=0
-          strip_debug_info=true
-          "
-          ninja -C out/Minimal-arm libsfast
-
-      - name: Configure & Build Minimal Library (ARM64)
-        run: |
-          cd ~/libsfast/src
-          gn gen out/Minimal-arm64 --args="
-          target_os='android'
-          target_cpu='arm64'
-          is_debug=false
-          is_official_build=true
-          enable_extensions=true
-          enable_devtools=true
-          enable_webview=true
-          enable_multi_tab=true
-          symbol_level=0
-          strip_debug_info=true
-          "
-          ninja -C out/Minimal-arm64 libsfast
-
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload compressed file as artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: libsfast
-          path: |
-            ~/libsfast/src/out/Minimal-arm/libsfast.so
-            ~/libsfast/src/out/Minimal-arm64/libsfast.so
+          name: kiwi_source
+          path: kiwi_source.7z
+          retention-days: 7  # Hapus setelah 7 hari
+
+      - name: Commit and push compressed file to repository
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          mv kiwi_source.7z .
+          git add kiwi_source.7z
+          git commit -m "Add compressed Kiwi Browser source"
+          git push
